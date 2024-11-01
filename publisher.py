@@ -6,9 +6,10 @@ from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose, PoseArray
 from typing import List
 from math import pi
+from practica_1.msg import Floor
 
 # Definir función para extraer configuración inicial y usarla después.
-def get_initial_conf(archivo="/home/laboratorio/ros_workspace/src/practica_1/src/practica_1/configuraciones.yaml") -> JointState:
+def get_initial_conf(archivo="/home/laboratorio/ros_workspace/src/practica_1/src/practica_1/confs_y_poses/configuraciones.yaml") -> JointState:
     with open(archivo, "r") as f:
         conf_data = yaml.safe_load(f)
         conf_position = conf_data["configuracion_inicial"]
@@ -20,7 +21,7 @@ def get_initial_conf(archivo="/home/laboratorio/ros_workspace/src/practica_1/src
     return conf
 
 # Del mismo modo extraer pose incial.
-def get_initial_pose(archivo="/home/laboratorio/ros_workspace/src/practica_1/src/practica_1/poses.yaml") -> Pose:
+def get_initial_pose(archivo="/home/laboratorio/ros_workspace/src/practica_1/src/practica_1/confs_y_poses/poses.yaml") -> Pose:
     with open(archivo, "r") as f:
         pose_data = yaml.safe_load(f)
         
@@ -76,17 +77,31 @@ def create_trajectory(pose: Pose) -> PoseArray:
 
     return trajectory
 
+def create_floor() -> Floor:
+    pose_suelo = Pose()
+    pose_suelo.position.x = 0.0
+    pose_suelo.position.y = 0.0
+    pose_suelo.position.z = -0.026
+
+    floor = Floor()
+    floor.pose_caja = pose_suelo
+    floor.name = 'suelo'
+    floor.tamaño = [2, 2, .05]
+
+    return floor
+
 def publish():
     rospy.init_node('basic_publisher', anonymous=True)
     pub_pose = rospy.Publisher("/mover_pose", Pose, queue_size=10)
     pub_conf = rospy.Publisher("/mover_configuracion", JointState, queue_size=10)
     pub_trajectory = rospy.Publisher("/trayectoria_cartesiana", PoseArray, queue_size=10)
-    #pub_obstacle = rospy.Publisher("/añadir_obstaculo", , queue_size=10)
+    pub_obstacle = rospy.Publisher("/añadir_obstaculo", Floor, queue_size=10)
     rate = rospy.Rate(1)
 
     # Creamos variables para la configuración inicial y la pose inicial.
     conf_init = get_initial_conf()
     pose_init = get_initial_pose()
+    floor = create_floor()
 
     print("===============================================")
     print('0 -> Enviar obstáculo para crear suelo.')
@@ -101,7 +116,7 @@ def publish():
         order = int(input("Ingrese la orden: "))
 
         if order == 0:
-            pass
+            pub_obstacle.publish(floor)
 
         elif order == 1:
             pub_conf.publish(conf_init)

@@ -10,6 +10,7 @@ from sensor_msgs.msg import JointState
 from moveit_commander.conversions import pose_to_list
 from typing import List
 from geometry_msgs.msg import Pose, PoseStamped, PoseArray
+from practica_1.msg import Floor
 
 class ControlRobot:
     def __init__(self) -> None:
@@ -25,7 +26,7 @@ class ControlRobot:
         self.pose_subscriber = rospy.Subscriber("/mover_pose", Pose, self.pose_callback)
         self.conf_subscriber = rospy.Subscriber("/mover_configuracion", JointState, self.conf_callback)
         self.trajectory_subscriber = rospy.Subscriber("trayectoria_cartesiana", PoseArray, self.trajectory_callback)
-        # Aquí definir el del obstáculo.
+        self.obstacle_subscriber = rospy.Subscriber("/añadir_obstaculo", Floor, self.obstacle_callback)
 
     def get_motor_angles(self) -> list: # Obtener ángulos de motores
         return self.move_group.get_current_joint_values()
@@ -77,13 +78,16 @@ class ControlRobot:
         self.move_motors(self.position)
 
     def trajectory_callback(self, trajectory: PoseArray) -> None:
+        print("Siguiendo trayectoria deseada...")
+
         # Tomamos la posición incicial y luego usamos las poses enviadas.
         self.waypoints = trajectory.poses
         self.waypoints.insert(0, self.get_pose())
         self.move_trajectory(poses=self.waypoints, wait=True)
 
-    #def obstacle_callback() -> None:
-        #pass
+    def obstacle_callback(self, obstacle: Floor) -> None:
+        print("Se ha añadido el obstaculo deseado.")
+        self.add_to_planning_scene(obstacle.pose_caja, obstacle.name, tuple(obstacle.tamaño))
 
     def action(self) -> None:
         # El nodo suscriptor creado en el __init__ empieza a funcionar
