@@ -13,5 +13,5 @@ Este proyecto contiene scripts en Python que implementan un sistema de publicaci
 ### Archivos y Carpetas
 
 - **confs_y_poses**: Carpeta que contiene dos archivos YAML donde se almacena:
-  - La configuración inicial del robot.
-  - La pose inicial del robot.
+  - Una configuración inicial para el robot.
+  - Una pose a la que moverse.
