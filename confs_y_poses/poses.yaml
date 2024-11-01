@@ -1,0 +1,10 @@
+pose_inicial:
+  orientation:
+    w: 1.0
+    x: 0
+    y: 0
+    z: 0
+  position:
+    x: -0.164
+    y: -0.48
+    z: 0.3
